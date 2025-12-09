@@ -1,0 +1,21 @@
+{
+  "name": "refresher",
+  "version": "0.0.2",
+  "description": "Buildertrend scraper and SQlite DB storage and Push to Monday via API",
+  "main": "log.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Dakota Wilson",
+  "license": "GNUPL 3.0",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2",
+    "playwright": "^1.57.0",
+    "sqlite3": "^5.1.7"
+  }
+}
