@@ -10,10 +10,10 @@
       "change_orders": "https://buildertrend.net/app/ChangeOrders"
     },
     "captcha_wait": true,
-    "wait_time": 1750
+    "wait_time": 1500
   },
   "debug": {
-    "headless": true,
+    "headless": false,
     "debugStatus": true
   },
   "monday": {

@@ -1,7 +1,7 @@
-src/0.OLD - DO NOT USE/
-src/node_modules/
-src/package-lock.json
+node_modules/
+package-lock.json
 WARP.md
-db/database.db
 .DS_Store
-src/.DS_Store
+database.db
+ignore.js
+0.OLD - DO NOT USE/

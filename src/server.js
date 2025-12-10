@@ -1,14 +1,45 @@
+const app = require('./http');
 const log = require('./log');
 const { verifyLogin } = require('./buildertrend');
 
-async function main() {
-  log.info('Starting Buildertrend login verification...');
+const PORT = process.env.PORT || 3000;
 
-  const url = await verifyLogin();
-  log.success(`Verified Buildertrend login, landed on: ${url}`);
+const server = app.listen(PORT, () => {
+  log.success(`Refresher API server listening on port ${PORT}`);
+
+  (async () => {
+    try {
+      log.info('Warming up Buildertrend session via verifyLogin()...');
+      const url = await verifyLogin();
+      log.success(`Buildertrend session ready; landed on: ${url}`);
+    } catch (err) {
+      log.error(
+        `Background verifyLogin failed (server will still accept requests): ${
+          err.stack || err.message
+        }`,
+      );
+    }
+  })();
+});
+
+function shutdown(code = 0) {
+  log.info('Shutting down server...');
+  server.close(() => {
+    log.success('Server closed. Exiting process.');
+    process.exit(code);
+  });
 }
 
-main().catch((err) => {
-  log.error(`Error in Buildertrend login test: ${err.stack || err.message}`);
-  process.exitCode = 1;
+process.on('SIGINT', () => {
+  shutdown(0);
+});
+
+process.on('unhandledRejection', (err) => {
+  log.error(`Unhandled promise rejection: ${err.stack || err}`);
+  shutdown(1);
+});
+
+process.on('uncaughtException', (err) => {
+  log.error(`Uncaught exception: ${err.stack || err}`);
+  shutdown(1);
 });
