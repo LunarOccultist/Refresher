@@ -1,4 +1,5 @@
 node_modules/
+config.json
 package-lock.json
 WARP.md
 .DS_Store
