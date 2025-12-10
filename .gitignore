@@ -2,5 +2,6 @@ src/0.OLD - DO NOT USE/
 src/node_modules/
 src/package-lock.json
 WARP.md
+db/database.db
 .DS_Store
 src/.DS_Store

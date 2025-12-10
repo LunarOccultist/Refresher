@@ -1,0 +1,24 @@
+{
+  "buildertrend": {
+    "username": "dakota.wilson@relevantpro.com",
+    "password": "3kxE6c5qCH2L1n",
+    "urls": {
+      "landing": "https://buildertrend.net/app/landing",
+      "estimate": "https://buildertrend.net/app/Estimate",
+      "job_cost": "https://buildertrend.net/app/JobCostingBudget",
+      "invoices": "https://buildertrend.net/app/OwnerInvoices",
+      "change_orders": "https://buildertrend.net/app/ChangeOrders"
+    },
+    "captcha_wait": true,
+    "wait_time": 1750
+  },
+  "debug": {
+    "headless": true,
+    "debugStatus": true
+  },
+  "monday": {
+    "api_key": "YOUR_MONDAY_API_KEY",
+    "board_id": "YOUR_BOARD_ID",
+    "group_id": "topics"
+  }
+}
