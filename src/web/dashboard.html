@@ -1,0 +1,1803 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Relevant Construction – Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: #edf2f7;
+        color: #0c394d;
+      }
+
+      .app-shell {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 20px;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+        z-index: 20;
+      }
+
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .topbar-logo {
+        height: 28px;
+        width: auto;
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+.topbar-greeting {
+        font-size: 0.95rem;
+        color: #6b7280;
+        cursor: pointer;
+      }
+
+      .topbar-greeting span {
+        font-weight: 600;
+        color: #0c394d;
+      }
+
+      .topbar-avatar-button {
+        border: 2px solid #de5419;
+        background: #de5419;
+        padding: 0;
+        cursor: pointer;
+        border-radius: 999px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .topbar-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 999px;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+
+      .topbar-logout-button {
+        border: none;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+        border-radius: 999px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+      }
+
+      .topbar-logout-button:hover {
+        color: #dc2626;
+      }
+
+      .topbar-logout-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+.main-row {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+        padding-top: 60px; /* make room for fixed topbar */
+      }
+
+      .sidebar {
+        width: 200px;
+        background: #0c394d;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+
+      .sidebar-nav {
+        padding-top: 40px;
+      }
+
+      .nav-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .nav-item {
+        position: relative;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+
+      .nav-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: transparent;
+        border-radius: 0 2px 2px 0;
+        transition: background 0.15s ease;
+      }
+
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .nav-item.nav-item--active:hover {
+        background: #ffffff;
+      }
+
+      .nav-item--active {
+        background: #ffffff;
+        color: #0c394d;
+        font-weight: 600;
+      }
+
+      .nav-item--active::before {
+        background: #de5419;
+      }
+
+      .sidebar-footer {
+        padding: 12px 10px 16px;
+        font-size: 0.7rem;
+      }
+
+      .sidebar-footer-title {
+        margin-bottom: 4px;
+      }
+
+      .status-list {
+        list-style: none;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 2px;
+      }
+
+      .admin-users-table tbody tr.admin-user-row,
+      .jobs-table tbody tr.jobs-row {
+        border-bottom: 1px solid #e5e7eb;
+        cursor: pointer;
+        transition: background 0.12s ease;
+      }
+
+      .admin-users-table tbody tr.admin-user-row:hover,
+      .jobs-table tbody tr.jobs-row:hover {
+        background: #f9fafb;
+      }
+
+      .admin-users-table tbody tr.admin-user-row--selected {
+        background: #eff6ff;
+      }
+
+.admin-user-name-btn {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2563eb;
+      }
+
+      .admin-user-name-btn:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+
+      .jobs-address-btn {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2563eb;
+        border: none;
+        background: none;
+        padding: 0;
+        cursor: pointer;
+      }
+
+      .jobs-address-btn:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+
+      .admin-status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .admin-status-badge--active {
+        background: #dcfce7;
+        color: #15803d;
+      }
+
+      .admin-status-badge--inactive {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #16a34a;
+      }
+
+      .content {
+        flex: 1;
+        padding: 16px 20px;
+        min-height: 0;
+        margin-left: 200px; /* account for fixed sidebar */
+      }
+
+      .content-panel {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+        border: 1px solid #e5e7eb;
+        width: 100%;
+        height: calc(100vh - 72px);
+        overflow: auto;
+      }
+
+      /* User settings panel */
+      .settings-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 40;
+      }
+
+      .settings-overlay--visible {
+        display: flex;
+      }
+
+      .settings-panel {
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.35);
+        width: 440px;
+        max-width: calc(100% - 32px);
+        padding: 20px 22px 18px;
+      }
+
+      .settings-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .settings-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0c394d;
+      }
+
+      .settings-close {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 1rem;
+        color: #6b7280;
+      }
+
+      .settings-row {
+        margin-top: 10px;
+      }
+
+      .settings-row label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #6b7280;
+        margin-bottom: 4px;
+      }
+
+      .settings-row input {
+        width: 100%;
+        padding: 8px 9px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 0.85rem;
+      }
+
+      .settings-row select {
+        width: 100%;
+        padding: 8px 9px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 0.85rem;
+        background-color: #ffffff;
+      }
+
+      .settings-row input:focus,
+      .settings-row select:focus {
+        outline: none;
+        border-color: #0c394d;
+        box-shadow: 0 0 0 1px #0c394d33;
+      }
+
+      .settings-avatar-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px dashed #d1d5db;
+        background: #f9fafb;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease;
+      }
+
+      .settings-avatar-row.drag-over {
+        border-color: #de5419;
+        background: #fff7ed;
+      }
+
+      .settings-avatar-preview {
+        height: 56px;
+        width: 56px;
+        border-radius: 999px;
+        object-fit: cover;
+        object-position: center;
+        border: 2px solid #de5419;
+        background: #de5419;
+        display: block;
+      }
+
+      .settings-avatar-input {
+        flex: 1;
+      }
+
+      .settings-avatar-input input[type='file'] {
+        display: none;
+      }
+
+      .settings-avatar-input-label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #0c394d;
+      }
+
+      .settings-avatar-help {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 2px;
+      }
+
+      .settings-section-title {
+        margin-top: 18px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #0c394d;
+      }
+
+      .settings-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+
+      .settings-primary-action {
+        min-width: 140px;
+        text-align: center;
+      }
+
+      .btn {
+        border-radius: 999px;
+        padding: 7px 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid transparent;
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      .btn-primary {
+        background: #0c394d;
+        color: #ffffff;
+        border-color: #0c394d;
+      }
+
+      .btn-primary:hover {
+        background: #082634;
+      }
+
+      .settings-error {
+        margin-top: 6px;
+        font-size: 0.8rem;
+        color: #dc2626;
+        min-height: 1em;
+      }
+
+      .settings-success {
+        margin-top: 4px;
+        font-size: 0.8rem;
+        color: #16a34a;
+        min-height: 1em;
+      }
+
+      .divider {
+        margin: 10px 0;
+        border: none;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          display: none;
+        }
+
+        .content {
+          margin-left: 0;
+        }
+
+        .content-panel {
+          height: auto;
+          min-height: calc(100vh - 72px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <img src="assets/logo.png" alt="Relevant Construction" class="topbar-logo" />
+        </div>
+
+        <div class="topbar-right">
+        <div class="topbar-right">
+          <div class="topbar-greeting" id="topbar-greeting">Hello, <span>User</span></div>
+          <button
+            type="button"
+            class="topbar-avatar-button"
+            id="open-settings-button"
+            aria-label="Open user settings"
+          >
+            <img
+              src="assets/users/default-avatar.svg"
+              alt="User avatar"
+              class="topbar-avatar"
+              id="topbar-avatar"
+            />
+          </button>
+          <button
+            type="button"
+            class="topbar-logout-button"
+            id="topbar-logout-button"
+            aria-label="Log out"
+            title="Log out"
+          >
+            <svg
+              class="topbar-logout-icon"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <rect
+                x="3"
+                y="4"
+                width="10"
+                height="16"
+                rx="1.5"
+                ry="1.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+              />
+              <path
+                d="M14 12h7m0 0-3-3m3 3-3 3"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="main-row">
+        <aside class="sidebar">
+          <div class="sidebar-nav">
+            <div class="nav-section">
+              <div class="nav-item nav-item--active" data-view="overview">Overview</div>
+              <div class="nav-item" data-view="jobs">Jobs</div>
+              <div class="nav-item nav-item--admin" data-view="admin">Admin</div>
+              <div class="nav-item" data-view="accounting">Accounting</div>
+            </div>
+          </div>
+
+          <div class="sidebar-footer">
+            <div class="sidebar-footer-title">Refresher v1.0.0</div>
+            <ul class="status-list">
+              <li class="status-item">
+                <span class="status-dot"></span>
+                <span>Database</span>
+              </li>
+              <li class="status-item">
+                <span class="status-dot"></span>
+                <span>Egress API</span>
+              </li>
+              <li class="status-item">
+                <span class="status-dot"></span>
+                <span>Status</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <main class="content">
+          <div class="content-panel" id="content-panel"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- User settings -->
+    <div class="settings-overlay" id="settings-overlay" aria-hidden="true">
+      <section class="settings-panel" role="dialog" aria-modal="true" aria-label="User settings">
+        <div class="settings-header">
+          <h2 class="settings-title">User Settings</h2>
+          <button type="button" class="settings-close" id="settings-close-button">×</button>
+        </div>
+
+        <form id="profile-form">
+          <div class="settings-row">
+            <label for="display-name">Name</label>
+            <input id="display-name" name="displayName" type="text" />
+          </div>
+
+          <div class="settings-row">
+            <label for="profile-email">Email</label>
+            <input id="profile-email" name="email" type="email" />
+          </div>
+
+          <div class="settings-row">
+            <label for="avatar-file">Profile Icon</label>
+            <div class="settings-avatar-row" id="avatar-dropzone">
+              <img
+                src="assets/users/default-avatar.svg"
+                alt="Avatar preview"
+                class="settings-avatar-preview"
+                id="settings-avatar-preview"
+              />
+              <div class="settings-avatar-input">
+                <div class="settings-avatar-input-label">Click or drop an image to update your icon</div>
+                <input
+                  id="avatar-file"
+                  name="avatar"
+                  type="file"
+                  accept="image/*"
+                />
+                <p class="settings-avatar-help">PNG/JPEG, up to 2&nbsp;MB.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button type="submit" class="btn btn-primary settings-primary-action">Save</button>
+          </div>
+          <p class="settings-error" id="profile-error"></p>
+          <p class="settings-success" id="profile-success"></p>
+        </form>
+
+        <hr class="divider" />
+
+        <h3 class="settings-section-title">Change Password</h3>
+        <form id="password-form">
+          <div class="settings-row">
+            <label for="current-password">Current password</label>
+            <input
+              id="current-password"
+              name="currentPassword"
+              type="password"
+              autocomplete="current-password"
+            />
+          </div>
+          <div class="settings-row">
+            <label for="new-password">New password</label>
+            <input
+              id="new-password"
+              name="newPassword"
+              type="password"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="settings-actions">
+            <button type="submit" class="btn btn-primary settings-primary-action">Update Password</button>
+          </div>
+          <p class="settings-error" id="password-error"></p>
+          <p class="settings-success" id="password-success"></p>
+        </form>
+      </section>
+    </div>
+
+    <!-- Admin edit user panel -->
+    <div class="settings-overlay" id="admin-user-overlay" aria-hidden="true">
+      <section class="settings-panel" role="dialog" aria-modal="true" aria-label="Edit user">
+        <div class="settings-header">
+          <h2 class="settings-title" id="admin-user-title">Edit User</h2>
+          <button type="button" class="settings-close" id="admin-user-close-button">×</button>
+        </div>
+
+        <form id="admin-user-profile-form">
+          <div class="settings-row">
+            <label for="admin-user-display-name">Name</label>
+            <input id="admin-user-display-name" name="displayName" type="text" />
+          </div>
+
+          <div class="settings-row">
+            <label for="admin-user-email">Email</label>
+            <input id="admin-user-email" name="email" type="email" />
+          </div>
+
+          <div class="settings-row">
+            <label for="admin-user-new-password">Password</label>
+            <input
+              id="admin-user-new-password"
+              name="newPassword"
+              type="text"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="settings-row">
+            <label for="admin-user-role">Role</label>
+            <select id="admin-user-role" name="role">
+              <option value="inactive">Inactive</option>
+              <option value="onboard">Onboard</option>
+              <option value="guest">Guest</option>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div class="settings-row">
+            <label for="admin-user-avatar-file">Profile Icon</label>
+            <div class="settings-avatar-row" id="admin-user-avatar-dropzone">
+              <img
+                src="assets/users/default-avatar.svg"
+                alt="Avatar preview"
+                class="settings-avatar-preview"
+                id="admin-user-avatar-preview"
+              />
+              <div class="settings-avatar-input">
+                <div class="settings-avatar-input-label">Click or drop an image to update their icon</div>
+                <input
+                  id="admin-user-avatar-file"
+                  name="avatar"
+                  type="file"
+                  accept="image/*"
+                />
+                <p class="settings-avatar-help">PNG/JPEG, up to 2&nbsp;MB.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button type="submit" class="btn btn-primary settings-primary-action">Save</button>
+          </div>
+          <p class="settings-error" id="admin-user-profile-error"></p>
+          <p class="settings-success" id="admin-user-profile-success"></p>
+        </form>
+
+        <!-- No separate change-password form; password is part of the main profile form for admins. -->
+      </section>
+    </div>
+
+    <!-- Job details panel -->
+    <div class="settings-overlay" id="job-overlay" aria-hidden="true">
+      <section class="settings-panel" role="dialog" aria-modal="true" aria-label="Job details">
+        <div class="settings-header">
+          <h2 class="settings-title" id="job-title">Job Details</h2>
+          <button type="button" class="settings-close" id="job-close-button">×</button>
+        </div>
+
+        <div id="job-details-body">
+          <p style="font-size: 0.85rem; color: #6b7280;">Loading...</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Create job panel -->
+    <div class="settings-overlay" id="job-create-overlay" aria-hidden="true">
+      <section class="settings-panel" role="dialog" aria-modal="true" aria-label="Create job">
+        <div class="settings-header">
+          <h2 class="settings-title" id="job-create-title">Create Job</h2>
+          <button type="button" class="settings-close" id="job-create-close-button">×</button>
+        </div>
+
+        <form id="job-create-form">
+          <div class="settings-row">
+            <label for="job-create-address">Address</label>
+            <input id="job-create-address" name="address" type="text" />
+          </div>
+
+          <div class="settings-row">
+            <label for="job-create-monday-id">Monday.com ID (optional)</label>
+            <input id="job-create-monday-id" name="mondayId" type="text" />
+          </div>
+
+          <div class="settings-actions">
+            <button type="submit" class="btn btn-primary settings-primary-action">Save</button>
+          </div>
+          <p class="settings-error" id="job-create-error"></p>
+          <p class="settings-success" id="job-create-success"></p>
+        </form>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        const overlay = document.getElementById('settings-overlay');
+        const openBtn = document.getElementById('open-settings-button');
+        const closeBtn = document.getElementById('settings-close-button');
+        const topbarGreeting = document.getElementById('topbar-greeting');
+        const topbarAvatar = document.getElementById('topbar-avatar');
+        const topbarLogoutButton = document.getElementById('topbar-logout-button');
+        const adminNavItem = document.querySelector('.nav-item.nav-item--admin');
+        const contentPanel = document.getElementById('content-panel');
+        const navItems = document.querySelectorAll('.nav-item[data-view]');
+        const avatarPreview = document.getElementById('settings-avatar-preview');
+        const avatarFileInput = document.getElementById('avatar-file');
+        const avatarDropzone = document.getElementById('avatar-dropzone');
+        const displayNameInput = document.getElementById('display-name');
+        const emailInput = document.getElementById('profile-email');
+
+        const profileForm = document.getElementById('profile-form');
+        const profileError = document.getElementById('profile-error');
+        const profileSuccess = document.getElementById('profile-success');
+
+        const passwordForm = document.getElementById('password-form');
+        const passwordError = document.getElementById('password-error');
+        const passwordSuccess = document.getElementById('password-success');
+
+        // Admin edit user overlay elements
+        const adminOverlay = document.getElementById('admin-user-overlay');
+        const adminCloseBtn = document.getElementById('admin-user-close-button');
+        const adminUserTitle = document.getElementById('admin-user-title');
+        const adminUserDisplayNameInput = document.getElementById('admin-user-display-name');
+        const adminUserEmailInput = document.getElementById('admin-user-email');
+        const adminUserRoleSelect = document.getElementById('admin-user-role');
+        const adminUserAvatarPreview = document.getElementById('admin-user-avatar-preview');
+        const adminUserAvatarFileInput = document.getElementById('admin-user-avatar-file');
+        const adminUserAvatarDropzone = document.getElementById('admin-user-avatar-dropzone');
+        const adminUserProfileForm = document.getElementById('admin-user-profile-form');
+        const adminUserProfileError = document.getElementById('admin-user-profile-error');
+        const adminUserProfileSuccess = document.getElementById('admin-user-profile-success');
+
+        // Job details overlay
+        const jobOverlay = document.getElementById('job-overlay');
+        const jobCloseBtn = document.getElementById('job-close-button');
+        const jobTitle = document.getElementById('job-title');
+        const jobDetailsBody = document.getElementById('job-details-body');
+
+        // Job create overlay
+        const jobCreateOverlay = document.getElementById('job-create-overlay');
+        const jobCreateCloseBtn = document.getElementById('job-create-close-button');
+        const jobCreateForm = document.getElementById('job-create-form');
+        const jobCreateAddressInput = document.getElementById('job-create-address');
+        const jobCreateMondayIdInput = document.getElementById('job-create-monday-id');
+        const jobCreateError = document.getElementById('job-create-error');
+        const jobCreateSuccess = document.getElementById('job-create-success');
+
+        let currentView = 'overview';
+        let adminUsers = [];
+        let selectedAdminUserId = null;
+
+        let jobsOverview = [];
+        let jobSnapshotsCache = {};
+        let currentUserProfile = null;
+
+        function renderView(view) {
+          if (!contentPanel) return;
+          currentView = view;
+
+          navItems.forEach((item) => {
+            if (item.dataset.view === view) {
+              item.classList.add('nav-item--active');
+            } else {
+              item.classList.remove('nav-item--active');
+            }
+          });
+
+          if (view === 'overview') {
+            contentPanel.innerHTML = `
+              <div style="padding: 16px;">
+                <h2 style="font-size: 1rem; margin-bottom: 8px;">Overview</h2>
+                <p style="font-size: 0.85rem; color: #6b7280;">
+                  High-level metrics and trends will appear here.
+                </p>
+              </div>
+            `;
+          } else if (view === 'jobs') {
+            contentPanel.innerHTML = `
+              <div style="padding: 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                  <div>
+                    <h2 style="font-size: 1rem; margin-bottom: 4px;">Jobs</h2>
+                    <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">
+                      Addresses with their latest captured metrics.
+                    </p>
+                  </div>
+                  <button id="jobs-create-job-button" type="button" class="btn btn-primary settings-primary-action">Create Job</button>
+                </div>
+                <div id="jobs-container" style="margin-top: 8px;">
+                  <div id="jobs-loading" style="font-size: 0.85rem; color: #6b7280;">Loading jobs a0&hellip;</div>
+                  <div id="jobs-error" style="font-size: 0.85rem; color: #dc2626; display: none;"></div>
+                  <div id="jobs-table-wrapper" style="margin-top: 8px; overflow-x: auto;"></div>
+                </div>
+              </div>
+            `;
+            loadJobsOverview();
+            const createJobBtn = document.getElementById('jobs-create-job-button');
+            if (createJobBtn) {
+              const role = currentUserProfile && currentUserProfile.role;
+              if (role === 'user' || role === 'admin') {
+                createJobBtn.addEventListener('click', openJobCreateOverlay);
+              } else {
+                createJobBtn.style.display = 'none';
+              }
+            }
+          } else if (view === 'admin') {
+            contentPanel.innerHTML = `
+              <div style="padding: 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                  <div>
+                    <h2 style="font-size: 1rem; margin-bottom: 4px;">Admin &mdash; Users</h2>
+                    <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">
+                      Manage user accounts, roles, and access.
+                    </p>
+                  </div>
+                  <button id="admin-create-user-button" type="button" class="btn btn-primary settings-primary-action">Create User</button>
+                </div>
+                <div id="admin-users-container" style="margin-top: 8px;">
+                  <div id="admin-users-loading" style="font-size: 0.85rem; color: #6b7280;">Loading users\u0000a0&hellip;</div>
+                  <div id="admin-users-error" style="font-size: 0.85rem; color: #dc2626; display: none;"></div>
+                  <div id="admin-users-table-wrapper" style="margin-top: 8px; overflow-x: auto;"></div>
+                </div>
+              </div>
+            `;
+            loadAdminUsers();
+            const createBtn = document.getElementById('admin-create-user-button');
+            if (createBtn) {
+              createBtn.addEventListener('click', () => {
+                openAdminCreateUserPanel();
+              });
+            }
+          } else if (view === 'accounting') {
+            contentPanel.innerHTML = `
+              <div style="padding: 16px;">
+                <h2 style="font-size: 1rem; margin-bottom: 8px;">Accounting</h2>
+                <p style="font-size: 0.85rem; color: #6b7280;">
+                  Future financial and QuickBooks integration views will appear here.
+                </p>
+              </div>
+            `;
+          }
+        }
+
+        function computeUserStatus(role) {
+          if (!role || role === 'inactive' || role === 'onboard') {
+            return { label: 'Inactive', variant: 'inactive' };
+          }
+          return { label: 'Active', variant: 'active' };
+        }
+
+        function renderAdminUsersTable() {
+          const wrapper = document.getElementById('admin-users-table-wrapper');
+          const loadingEl = document.getElementById('admin-users-loading');
+          const errorEl = document.getElementById('admin-users-error');
+          if (!wrapper || !loadingEl || !errorEl) return;
+
+          loadingEl.style.display = 'none';
+
+          if (!adminUsers.length) {
+            wrapper.innerHTML = '<p style="font-size: 0.85rem; color: #6b7280;">No users found.</p>';
+            return;
+          }
+
+          const rowsHtml = adminUsers
+            .map((user) => {
+              const name = (user.display_name || user.displayName || '').trim() || (user.email || `User #${user.id}`);
+              const status = computeUserStatus(user.role);
+              const safeEmail = user.email || '';
+              const safeRole = user.role || '';
+              const rowClasses = `admin-user-row${selectedAdminUserId === user.id ? ' admin-user-row--selected' : ''}`;
+              return `
+                <tr class="${rowClasses}" data-user-id="${user.id}">
+                  <td style="padding: 6px 8px; font-size: 0.85rem;">
+                    <span class="admin-user-name-btn">${name}</span>
+                  </td>
+                  <td style="padding: 6px 8px; font-size: 0.85rem; text-transform: capitalize;">${safeRole}</td>
+                  <td style="padding: 6px 8px; font-size: 0.85rem;"><span class="admin-status-badge admin-status-badge--${status.variant}">${status.label}</span></td>
+                  <td style="padding: 6px 8px; font-size: 0.85rem;">${safeEmail}</td>
+                </tr>
+              `;
+            })
+            .join('');
+
+          wrapper.innerHTML = `
+            <table class="admin-users-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+              <thead>
+                <tr style="text-align: left; border-bottom: 1px solid #e5e7eb;">
+                  <th style="padding: 6px 8px; font-weight: 600;">Name</th>
+                  <th style="padding: 6px 8px; font-weight: 600;">Role</th>
+                  <th style="padding: 6px 8px; font-weight: 600;">Status</th>
+                  <th style="padding: 6px 8px; font-weight: 600;">Email</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          `;
+
+          // Event delegation so clicking anywhere in the row opens the edit popup
+          wrapper.onclick = function (event) {
+            const row = event.target.closest('.admin-user-row');
+            if (!row) return;
+            const id = Number(row.getAttribute('data-user-id'));
+            if (!Number.isNaN(id)) {
+              openAdminUserPanel(id);
+            }
+          };
+        }
+
+        async function loadAdminUsers() {
+          const loadingEl = document.getElementById('admin-users-loading');
+          const errorEl = document.getElementById('admin-users-error');
+          if (loadingEl) loadingEl.style.display = '';
+          if (errorEl) {
+            errorEl.style.display = 'none';
+            errorEl.textContent = '';
+          }
+
+          try {
+            const res = await fetch('/api/admin/users');
+            if (!res.ok) {
+              if (errorEl) {
+                errorEl.style.display = '';
+                errorEl.textContent = 'Failed to load users.';
+              }
+              return;
+            }
+            const data = await res.json();
+            adminUsers = Array.isArray(data) ? data : [];
+            renderAdminUsersTable();
+          } catch (err) {
+            if (errorEl) {
+              errorEl.style.display = '';
+              errorEl.textContent = 'Network error while loading users.';
+            }
+          }
+        }
+
+        // Jobs overview table
+        function formatDateTime(value) {
+          if (!value) return '—';
+          const d = new Date(value);
+          if (Number.isNaN(d.getTime())) return value;
+          return d.toLocaleString();
+        }
+
+        function renderJobsTable() {
+          const wrapper = document.getElementById('jobs-table-wrapper');
+          const loadingEl = document.getElementById('jobs-loading');
+          const errorEl = document.getElementById('jobs-error');
+          if (!wrapper || !loadingEl || !errorEl) return;
+
+          loadingEl.style.display = 'none';
+
+          if (!jobsOverview.length) {
+            wrapper.innerHTML = '<p style="font-size: 0.85rem; color: #6b7280;">No jobs found.</p>';
+            return;
+          }
+
+          const rowsHtml = jobsOverview
+            .map((row) => {
+              const safeAddress = row.address || `Job #${row.id}`;
+              const captured = formatDateTime(row.latestCapturedAt);
+              const m = row.latestMetrics || {};
+              const metricsText = row.latestMetrics
+                ? `Est: ${m.est_bc ?? '—'} / ${m.est_cp ?? '—'} · Job: ${m.job_cost ?? '—'} · Inv: ${m.inv_t ?? '—'} / ${m.inv_p ?? '—'}`
+                : 'No snapshots yet';
+
+              return `
+                <tr class="jobs-row" data-address="${safeAddress}">
+                  <td style="padding: 6px 8px; font-size: 0.85rem;">
+                    <button type="button" class="jobs-address-btn" data-address="${safeAddress}">
+                      ${safeAddress}
+                    </button>
+                  </td>
+                  <td style="padding: 6px 8px; font-size: 0.85rem; white-space: nowrap;">${captured}</td>
+                  <td style="padding: 6px 8px; font-size: 0.85rem;">${metricsText}</td>
+                </tr>
+              `;
+            })
+            .join('');
+
+          wrapper.innerHTML = `
+            <table class="jobs-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+              <thead>
+                <tr style="text-align: left; border-bottom: 1px solid #e5e7eb;">
+                  <th style="padding: 6px 8px; font-weight: 600;">Address</th>
+                  <th style="padding: 6px 8px; font-weight: 600;">Last Snapshot</th>
+                  <th style="padding: 6px 8px; font-weight: 600;">Latest Metrics</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          `;
+
+          wrapper.onclick = function (event) {
+            const btn = event.target.closest('.jobs-address-btn');
+            if (!btn) return;
+            const address = btn.getAttribute('data-address');
+            if (address) {
+              openJobDetails(address);
+            }
+          };
+        }
+
+        async function loadJobsOverview() {
+          const loadingEl = document.getElementById('jobs-loading');
+          const errorEl = document.getElementById('jobs-error');
+          if (loadingEl) loadingEl.style.display = '';
+          if (errorEl) {
+            errorEl.style.display = 'none';
+            errorEl.textContent = '';
+          }
+
+          try {
+            const res = await fetch('/api/jobs/overview');
+            if (!res.ok) {
+              if (errorEl) {
+                errorEl.style.display = '';
+                errorEl.textContent = 'Failed to load jobs.';
+              }
+              return;
+            }
+            const data = await res.json();
+            jobsOverview = Array.isArray(data) ? data : [];
+            renderJobsTable();
+          } catch (err) {
+            if (errorEl) {
+              errorEl.style.display = '';
+              errorEl.textContent = 'Network error while loading jobs.';
+            }
+          }
+        }
+
+        function handleNavClick(event) {
+          const target = event.currentTarget;
+          const view = target && target.dataset.view;
+          if (!view) return;
+          if (view === 'admin' && adminNavItem && adminNavItem.style.display === 'none') {
+            // Non-admin users shouldn't be able to activate Admin even via keyboard
+            return;
+          }
+          renderView(view);
+        }
+
+        navItems.forEach((item) => {
+          item.addEventListener('click', handleNavClick);
+        });
+
+        function openSettings() {
+          overlay.classList.add('settings-overlay--visible');
+          overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeSettings() {
+          overlay.classList.remove('settings-overlay--visible');
+          overlay.setAttribute('aria-hidden', 'true');
+          profileError.textContent = '';
+          profileSuccess.textContent = '';
+          passwordError.textContent = '';
+          passwordSuccess.textContent = '';
+        }
+
+        if (openBtn) {
+          openBtn.addEventListener('click', openSettings);
+        }
+        if (topbarGreeting) {
+          topbarGreeting.addEventListener('click', openSettings);
+        }
+        closeBtn.addEventListener('click', closeSettings);
+        overlay.addEventListener('click', function (event) {
+          if (event.target === overlay) {
+            closeSettings();
+          }
+        });
+
+        function openAdminOverlay() {
+          if (!adminOverlay) return;
+          adminOverlay.classList.add('settings-overlay--visible');
+          adminOverlay.setAttribute('aria-hidden', 'false');
+          adminUserProfileError.textContent = '';
+          adminUserProfileSuccess.textContent = '';
+        }
+
+        function closeAdminOverlay() {
+          if (!adminOverlay) return;
+          adminOverlay.classList.remove('settings-overlay--visible');
+          adminOverlay.setAttribute('aria-hidden', 'true');
+          adminUserProfileError.textContent = '';
+          adminUserProfileSuccess.textContent = '';
+          selectedAdminUserId = null;
+        }
+
+        if (adminCloseBtn) {
+          adminCloseBtn.addEventListener('click', closeAdminOverlay);
+        }
+        if (adminOverlay) {
+          adminOverlay.addEventListener('click', function (event) {
+            if (event.target === adminOverlay) {
+              closeAdminOverlay();
+            }
+          });
+        }
+
+        function openJobOverlay() {
+          if (!jobOverlay) return;
+          jobOverlay.classList.add('settings-overlay--visible');
+          jobOverlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeJobOverlay() {
+          if (!jobOverlay) return;
+          jobOverlay.classList.remove('settings-overlay--visible');
+          jobOverlay.setAttribute('aria-hidden', 'true');
+          if (jobDetailsBody) {
+            jobDetailsBody.innerHTML = '';
+          }
+        }
+
+        if (jobCloseBtn) {
+          jobCloseBtn.addEventListener('click', closeJobOverlay);
+        }
+        if (jobOverlay) {
+          jobOverlay.addEventListener('click', function (event) {
+            if (event.target === jobOverlay) {
+              closeJobOverlay();
+            }
+          });
+        }
+
+        function openJobCreateOverlay() {
+          if (!jobCreateOverlay) return;
+          jobCreateOverlay.classList.add('settings-overlay--visible');
+          jobCreateOverlay.setAttribute('aria-hidden', 'false');
+          if (jobCreateError) jobCreateError.textContent = '';
+          if (jobCreateSuccess) jobCreateSuccess.textContent = '';
+        }
+
+        function closeJobCreateOverlay() {
+          if (!jobCreateOverlay) return;
+          jobCreateOverlay.classList.remove('settings-overlay--visible');
+          jobCreateOverlay.setAttribute('aria-hidden', 'true');
+          if (jobCreateError) jobCreateError.textContent = '';
+          if (jobCreateSuccess) jobCreateSuccess.textContent = '';
+          if (jobCreateAddressInput) jobCreateAddressInput.value = '';
+          if (jobCreateMondayIdInput) jobCreateMondayIdInput.value = '';
+        }
+
+        if (jobCreateCloseBtn) {
+          jobCreateCloseBtn.addEventListener('click', closeJobCreateOverlay);
+        }
+        if (jobCreateOverlay) {
+          jobCreateOverlay.addEventListener('click', function (event) {
+            if (event.target === jobCreateOverlay) {
+              closeJobCreateOverlay();
+            }
+          });
+        }
+
+        function applyProfileToUI(profile) {
+          if (!profile) return;
+
+          currentUserProfile = profile;
+          try {
+            window.currentUser = profile;
+          } catch (e) {
+            // ignore if window is not writeable
+          }
+
+          const nameForGreeting = profile.displayName || profile.email || 'User';
+          if (topbarGreeting) {
+            topbarGreeting.innerHTML = `Hello, <span>${nameForGreeting}</span>`;
+          }
+
+          if (adminNavItem) {
+            if (profile.role === 'admin') {
+              adminNavItem.style.display = '';
+            } else {
+              adminNavItem.style.display = 'none';
+            }
+          }
+
+          if (profile.displayName) {
+            displayNameInput.value = profile.displayName;
+          }
+          if (profile.email) {
+            emailInput.value = profile.email;
+          }
+          if (profile.avatar) {
+            topbarAvatar.src = profile.avatar;
+            avatarPreview.src = profile.avatar;
+          } else {
+            topbarAvatar.src = 'assets/users/default-avatar.svg';
+            avatarPreview.src = 'assets/users/default-avatar.svg';
+          }
+        }
+
+        renderView(currentView);
+
+        async function openJobDetails(address) {
+          if (!address) return;
+          if (jobTitle) jobTitle.textContent = address;
+          if (jobDetailsBody) {
+            jobDetailsBody.innerHTML = '<p style="font-size: 0.85rem; color: #6b7280;">Loading snapshots…</p>';
+          }
+          openJobOverlay();
+
+          try {
+            // Cache by address so subsequent opens are instant
+            if (!jobSnapshotsCache[address]) {
+              const res = await fetch(`/api/jobs/${encodeURIComponent(address)}/snapshots`);
+              if (!res.ok) {
+                if (jobDetailsBody) {
+                  jobDetailsBody.innerHTML = '<p style="font-size: 0.85rem; color: #dc2626;">Failed to load job snapshots.</p>';
+                }
+                return;
+              }
+              const data = await res.json();
+              jobSnapshotsCache[address] = data;
+            }
+
+            const { job, snapshots } = jobSnapshotsCache[address];
+            const list = Array.isArray(snapshots) ? snapshots : [];
+            const visibleCount = 5;
+            const hasMore = list.length > visibleCount;
+
+            const itemsHtml = list.slice(0, visibleCount).map((snap) => {
+              const when = formatDateTime(snap.captured_at);
+              const m = {
+                est_bc: snap.est_bc,
+                est_cp: snap.est_cp,
+                job_cost: snap.job_cost,
+                inv_t: snap.inv_t,
+                inv_p: snap.inv_p,
+              };
+              const metricsText = `Est: ${m.est_bc ?? '—'} / ${m.est_cp ?? '—'} · Job: ${m.job_cost ?? '—'} · Inv: ${m.inv_t ?? '—'} / ${m.inv_p ?? '—'}`;
+              return `
+                <li style="padding: 6px 0; border-bottom: 1px solid #e5e7eb; font-size: 0.85rem;">
+                  <div style="font-weight: 600;">${when}</div>
+                  <div style="color: #4b5563;">${metricsText}</div>
+                </li>
+              `;
+            }).join('');
+
+            const moreHtml = hasMore
+              ? '<button type="button" id="job-load-more" class="btn" style="margin-top: 8px;">Load more</button>'
+              : '';
+
+            if (jobDetailsBody) {
+              jobDetailsBody.innerHTML = `
+                <div style="font-size: 0.85rem; color: #4b5563; margin-bottom: 8px;">
+                  <div><strong>Address:</strong> ${job.address}</div>
+                  <div><strong>Active:</strong> ${job.active ? 'Yes' : 'No'}</div>
+                </div>
+                <h3 class="settings-section-title">Recent Snapshots</h3>
+                <ul style="list-style: none; padding-left: 0; margin-top: 6px;">
+                  ${itemsHtml || '<li style="font-size: 0.85rem; color: #6b7280;">No snapshots yet.</li>'}
+                </ul>
+                ${moreHtml}
+              `;
+            }
+
+            if (hasMore && jobDetailsBody) {
+              const moreBtn = document.getElementById('job-load-more');
+              if (moreBtn) {
+                moreBtn.addEventListener('click', () => {
+                  const extraItemsHtml = list.slice(visibleCount).map((snap) => {
+                    const when = formatDateTime(snap.captured_at);
+                    const m = {
+                      est_bc: snap.est_bc,
+                      est_cp: snap.est_cp,
+                      job_cost: snap.job_cost,
+                      inv_t: snap.inv_t,
+                      inv_p: snap.inv_p,
+                    };
+                    const metricsText = `Est: ${m.est_bc ?? '—'} / ${m.est_cp ?? '—'} · Job: ${m.job_cost ?? '—'} · Inv: ${m.inv_t ?? '—'} / ${m.inv_p ?? '—'}`;
+                    return `
+                      <li style="padding: 6px 0; border-bottom: 1px solid #e5e7eb; font-size: 0.85rem;">
+                        <div style="font-weight: 600;">${when}</div>
+                        <div style="color: #4b5563;">${metricsText}</div>
+                      </li>
+                    `;
+                  }).join('');
+
+                  const listEl = jobDetailsBody.querySelector('ul');
+                  if (listEl) {
+                    listEl.insertAdjacentHTML('beforeend', extraItemsHtml);
+                  }
+                  moreBtn.remove();
+                });
+              }
+            }
+          } catch (err) {
+            if (jobDetailsBody) {
+              jobDetailsBody.innerHTML = '<p style="font-size: 0.85rem; color: #dc2626;">Network error while loading snapshots.</p>';
+            }
+          }
+        }
+
+        function openAdminCreateUserPanel() {
+          selectedAdminUserId = null;
+          adminUserProfileError.textContent = '';
+          adminUserProfileSuccess.textContent = '';
+
+          adminUserTitle.textContent = 'Create User';
+          adminUserDisplayNameInput.value = '';
+          adminUserEmailInput.value = '';
+          adminUserRoleSelect.value = 'user';
+          adminUserAvatarPreview.src = 'assets/users/default-avatar.svg';
+          const newPwInput = document.getElementById('admin-user-new-password');
+          if (newPwInput) newPwInput.value = '';
+
+          openAdminOverlay();
+        }
+
+        async function openAdminUserPanel(userId) {
+          selectedAdminUserId = userId;
+          adminUserProfileError.textContent = '';
+          adminUserProfileSuccess.textContent = '';
+
+          try {
+            const res = await fetch(`/api/admin/users/${userId}`);
+            if (!res.ok) {
+              adminUserProfileError.textContent = 'Failed to load user.';
+              return;
+            }
+            const user = await res.json();
+            const titleName = (user.displayName || user.email || `User #${user.id}`).trim();
+            adminUserTitle.textContent = `Edit User — ${titleName}`;
+            adminUserDisplayNameInput.value = user.displayName || '';
+            adminUserEmailInput.value = user.email || '';
+            adminUserRoleSelect.value = user.role || 'user';
+            if (user.avatar) {
+              adminUserAvatarPreview.src = user.avatar;
+            } else {
+              adminUserAvatarPreview.src = 'assets/users/default-avatar.svg';
+            }
+            openAdminOverlay();
+          } catch (err) {
+            adminUserProfileError.textContent = 'Network error while loading user.';
+          }
+        }
+
+        async function loadProfile() {
+          try {
+            const res = await fetch('/api/me');
+            if (!res.ok) return;
+            const data = await res.json();
+            applyProfileToUI(data);
+          } catch (err) {
+            // ignore for now
+          }
+        }
+
+        async function uploadAvatarFile(file) {
+          if (!file) return;
+
+          profileError.textContent = '';
+          profileSuccess.textContent = '';
+
+          const formData = new FormData();
+          formData.append('avatar', file);
+
+          try {
+            const res = await fetch('/api/me/avatar', {
+              method: 'POST',
+              body: formData,
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              profileError.textContent = data.error || 'Failed to upload icon';
+              return;
+            }
+
+            profileSuccess.textContent = 'Profile updated.';
+            applyProfileToUI(data);
+          } catch (err) {
+            profileError.textContent = 'Network error. Please try again.';
+          }
+        }
+
+        if (avatarFileInput) {
+          avatarFileInput.addEventListener('change', function () {
+            const file = avatarFileInput.files && avatarFileInput.files[0];
+            if (!file) return;
+            uploadAvatarFile(file);
+          });
+        }
+
+        if (avatarDropzone && avatarFileInput) {
+          const openFilePicker = function () {
+            avatarFileInput.click();
+          };
+
+          avatarDropzone.addEventListener('click', openFilePicker);
+          avatarPreview.addEventListener('click', openFilePicker);
+
+          ['dragenter', 'dragover'].forEach((eventName) => {
+            avatarDropzone.addEventListener(eventName, function (event) {
+              event.preventDefault();
+              event.stopPropagation();
+              avatarDropzone.classList.add('drag-over');
+            });
+          });
+
+          ['dragleave', 'drop'].forEach((eventName) => {
+            avatarDropzone.addEventListener(eventName, function (event) {
+              event.preventDefault();
+              event.stopPropagation();
+              avatarDropzone.classList.remove('drag-over');
+            });
+          });
+
+          avatarDropzone.addEventListener('drop', function (event) {
+            const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+            if (!file) return;
+            uploadAvatarFile(file);
+          });
+        }
+
+        profileForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          profileError.textContent = '';
+          profileSuccess.textContent = '';
+
+          const payload = {
+            displayName: displayNameInput.value.trim(),
+            email: emailInput.value.trim(),
+          };
+
+          try {
+            const res = await fetch('/api/me/profile', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              profileError.textContent = data.error || 'Failed to update profile';
+              return;
+            }
+
+            profileSuccess.textContent = 'Profile updated.';
+            applyProfileToUI(data);
+          } catch (err) {
+            profileError.textContent = 'Network error. Please try again.';
+          }
+        });
+
+        passwordForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          passwordError.textContent = '';
+          passwordSuccess.textContent = '';
+
+          const currentPassword = document.getElementById('current-password').value;
+          const newPassword = document.getElementById('new-password').value;
+
+          if (!currentPassword || !newPassword) {
+            passwordError.textContent = 'Current and new password are required.';
+            return;
+          }
+
+          try {
+            const res = await fetch('/api/me/password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ currentPassword, newPassword }),
+            });
+
+            if (res.status === 204) {
+              passwordSuccess.textContent = 'Password updated.';
+              document.getElementById('current-password').value = '';
+              document.getElementById('new-password').value = '';
+              return;
+            }
+
+            const data = await res.json().catch(() => ({}));
+            passwordError.textContent = data.error || 'Failed to update password';
+          } catch (err) {
+            passwordError.textContent = 'Network error. Please try again.';
+          }
+        });
+
+        // Admin avatar upload handlers
+        async function uploadAdminAvatarFile(file) {
+          if (!file) return;
+
+          if (!selectedAdminUserId) {
+            adminUserProfileError.textContent = 'Save the user first, then upload an icon.';
+            adminUserProfileSuccess.textContent = '';
+            return;
+          }
+
+          adminUserProfileError.textContent = '';
+          adminUserProfileSuccess.textContent = '';
+
+          const formData = new FormData();
+          formData.append('avatar', file);
+
+          try {
+            const res = await fetch(`/api/admin/users/${selectedAdminUserId}/avatar`, {
+              method: 'POST',
+              body: formData,
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              adminUserProfileError.textContent = data.error || 'Failed to upload avatar';
+              return;
+            }
+
+            adminUserProfileSuccess.textContent = 'Profile updated.';
+            // Update avatar preview and, if this is the current user, reflect in topbar
+            adminUserAvatarPreview.src = data.avatar || adminUserAvatarPreview.src;
+            if (data.id && data.id === (window.currentUser && window.currentUser.id) && data.avatar) {
+              topbarAvatar.src = data.avatar;
+            }
+          } catch (err) {
+            adminUserProfileError.textContent = 'Network error while uploading avatar.';
+          }
+        }
+
+        if (adminUserAvatarFileInput) {
+          adminUserAvatarFileInput.addEventListener('change', function () {
+            const file = adminUserAvatarFileInput.files && adminUserAvatarFileInput.files[0];
+            if (!file) return;
+            uploadAdminAvatarFile(file);
+            // Reset value so picking the same file again still triggers change
+            adminUserAvatarFileInput.value = '';
+          });
+        }
+
+        if (adminUserAvatarDropzone && adminUserAvatarFileInput) {
+          const openAdminFilePicker = function () {
+            adminUserAvatarFileInput.click();
+          };
+
+          adminUserAvatarDropzone.addEventListener('click', openAdminFilePicker);
+          adminUserAvatarPreview.addEventListener('click', openAdminFilePicker);
+
+          ['dragenter', 'dragover'].forEach((eventName) => {
+            adminUserAvatarDropzone.addEventListener(eventName, function (event) {
+              event.preventDefault();
+              event.stopPropagation();
+              adminUserAvatarDropzone.classList.add('drag-over');
+            });
+          });
+
+          ['dragleave', 'drop'].forEach((eventName) => {
+            adminUserAvatarDropzone.addEventListener(eventName, function (event) {
+              event.preventDefault();
+              event.stopPropagation();
+              adminUserAvatarDropzone.classList.remove('drag-over');
+            });
+          });
+
+          adminUserAvatarDropzone.addEventListener('drop', function (event) {
+            const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+            if (!file) return;
+            uploadAdminAvatarFile(file);
+          });
+        }
+
+        if (adminUserProfileForm) {
+          adminUserProfileForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            adminUserProfileError.textContent = '';
+            adminUserProfileSuccess.textContent = '';
+
+            const payload = {
+              displayName: adminUserDisplayNameInput.value.trim(),
+              email: adminUserEmailInput.value.trim(),
+              role: adminUserRoleSelect.value,
+            };
+
+            const newPwInput = document.getElementById('admin-user-new-password');
+            const newPassword = newPwInput ? newPwInput.value : '';
+
+            try {
+              let url;
+              let method;
+              let body;
+
+              if (!selectedAdminUserId) {
+                // Create new user (admin flow)
+                if (!payload.email || !newPassword) {
+                  adminUserProfileError.textContent = 'Email and new password are required to create a user.';
+                  return;
+                }
+                url = '/api/admin/users';
+                method = 'POST';
+                body = JSON.stringify({ ...payload, newPassword });
+              } else {
+                // Update existing user
+                url = `/api/admin/users/${selectedAdminUserId}`;
+                method = 'PATCH';
+                body = JSON.stringify(payload);
+              }
+
+              const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body,
+              });
+
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                adminUserProfileError.textContent = data.error || 'Failed to update user';
+                return;
+              }
+
+              adminUserProfileSuccess.textContent = 'Profile updated.';
+
+              if (!selectedAdminUserId && data.id) {
+                // Switch into edit mode for the newly created user
+                selectedAdminUserId = data.id;
+                if (newPwInput) newPwInput.value = '';
+              }
+
+              // Refresh table to reflect changes
+              loadAdminUsers();
+            } catch (err) {
+              adminUserProfileError.textContent = 'Network error while updating user.';
+            }
+          });
+        }
+
+        // No separate adminUserPasswordForm; password is handled via the main profile form.
+
+        if (jobCreateForm) {
+          jobCreateForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            if (jobCreateError) jobCreateError.textContent = '';
+            if (jobCreateSuccess) jobCreateSuccess.textContent = '';
+
+            const address = jobCreateAddressInput ? jobCreateAddressInput.value.trim() : '';
+            const mondayIdRaw = jobCreateMondayIdInput ? jobCreateMondayIdInput.value.trim() : '';
+            const mondayId = mondayIdRaw || null;
+
+            if (!address) {
+              if (jobCreateError) jobCreateError.textContent = 'Address is required.';
+              return;
+            }
+
+            try {
+              const res = await fetch('/api/jobs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address, mondayId }),
+              });
+
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                if (jobCreateError) {
+                  jobCreateError.textContent = data.error || 'Failed to create job.';
+                }
+                return;
+              }
+
+              if (jobCreateSuccess) jobCreateSuccess.textContent = 'Job created.';
+
+              await loadJobsOverview();
+              closeJobCreateOverlay();
+            } catch (err) {
+              if (jobCreateError) {
+                jobCreateError.textContent = 'Network error while creating job.';
+              }
+            }
+          });
+        }
+
+        loadProfile();
+
+        async function performLogout() {
+          try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+          } catch (err) {
+            // ignore; we'll still clear client state
+          }
+
+          try {
+            window.localStorage.removeItem('authToken');
+          } catch (e) {
+            // ignore
+          }
+
+          window.location.href = '/login';
+        }
+
+        if (topbarLogoutButton) {
+          topbarLogoutButton.addEventListener('click', performLogout);
+        }
+      })();
+    </script>
+
+  </body>
+</html>

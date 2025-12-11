@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Relevant Construction – Automation Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: #020617;
+        color: #0f172a;
+      }
+
+      .shell {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      .bg-slideshow {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      .bg-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        filter: saturate(1.3) contrast(1.05);
+        transform: scale(1.04);
+        opacity: 0;
+        animation: bg-slideshow 60s linear infinite;
+        box-shadow: inset 0 0 350px rgba(0, 0, 0, 0.55);
+      }
+
+      .bg-slide--1 {
+        background-image:
+          linear-gradient(120deg, rgba(0, 0, 0, 0.25), rgba(15, 23, 42, 0.75)),
+          url('assets/bg1.jpg');
+        animation-delay: 0s;
+      }
+
+      .bg-slide--2 {
+        background-image:
+          linear-gradient(120deg, rgba(0, 0, 0, 0.25), rgba(15, 23, 42, 0.75)),
+          url('assets/bg2.jpg');
+        animation-delay: 12s;
+      }
+
+      .bg-slide--3 {
+        background-image:
+          linear-gradient(120deg, rgba(0, 0, 0, 0.25), rgba(15, 23, 42, 0.75)),
+          url('assets/bg3.jpg');
+        animation-delay: 22s;
+      }
+
+      .bg-slide--4 {
+        background-image:
+          linear-gradient(120deg, rgba(0, 0, 0, 0.25), rgba(15, 23, 42, 0.75)),
+          url('assets/bg4.jpg');
+        animation-delay: 32s;
+      }
+
+      .bg-slide--5 {
+        background-image:
+          linear-gradient(120deg, rgba(0, 0, 0, 0.25), rgba(15, 23, 42, 0.75)),
+          url('assets/bg5.jpg');
+        animation-delay: 42s;
+      }
+
+      @keyframes bg-slideshow {
+        0% {
+          opacity: 0;
+          transform: scale(1.02);
+        }
+        6% {
+          opacity: 1;
+        }
+        20% {
+          opacity: 1;
+        }
+        26% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.06);
+        }
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100vh;
+        padding: 32px 72px 32px 40px; /* top | right | bottom | left */
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        color: #ffffff;
+      }
+
+      .brand-logo {
+        height: 40px;
+        width: auto;
+        display: block;
+      }
+
+      .brand-subtitle {
+        font-size: 0.8rem;
+        color: #ffffff;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+
+      .main-row {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        flex: 1;
+        gap: 32px;
+        margin-bottom: 40px; /* keep login above footer while still low */
+      }
+
+      .login-card {
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.55);
+        padding: 32px 40px 30px;
+        width: 420px;
+        max-width: 100%;
+        border-top: 4px solid #de5419;
+      }
+
+      .login-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 18px;
+        color: #0c394d;
+      }
+
+      .field-group {
+        margin-bottom: 14px;
+      }
+
+      label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #6b7280;
+        margin-bottom: 6px;
+      }
+
+      input[type="email"],
+      input[type="password"] {
+        width: 100%;
+        padding: 10px 11px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        font-size: 0.9rem;
+        color: #111827;
+        background: #f9fafb;
+      }
+
+      input::placeholder {
+        color: #9ca3af;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #0c394d;
+        box-shadow: 0 0 0 1px #0c394d33;
+        background: #ffffff;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 16px;
+        gap: 8px;
+      }
+
+      .signup-text {
+        font-size: 0.75rem;
+        color: #6b7280;
+        white-space: nowrap;
+      }
+
+      .signup-text a {
+        color: #de5419;
+        text-decoration: none;
+        font-weight: 600;
+        margin-left: 4px;
+      }
+
+      .signup-text a:hover {
+        text-decoration: underline;
+      }
+
+      .btn-primary {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 32px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: #0c394d;
+        color: #ffffff;
+        white-space: nowrap;
+        min-width: 120px;
+        text-align: center;
+      }
+
+      .btn-primary:hover {
+        background: #082634;
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 0.7rem;
+        color: #e5e7eb;
+        margin-top: 16px;
+      }
+
+      .footer span {
+        opacity: 0.9;
+      }
+
+      .auth-error {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: #dc2626;
+        min-height: 1em;
+      }
+
+      @media (max-width: 768px) {
+        .content {
+          padding: 20px 20px 20px 16px;
+        }
+
+        .main-row {
+          justify-content: center;
+        }
+
+        .login-card {
+          width: 100%;
+          max-width: 380px;
+          padding-inline: 22px;
+        }
+
+        .brand {
+          font-size: 0.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="bg-slideshow" aria-hidden="true">
+        <div class="bg-slide bg-slide--1"></div>
+        <div class="bg-slide bg-slide--2"></div>
+        <div class="bg-slide bg-slide--3"></div>
+        <div class="bg-slide bg-slide--4"></div>
+        <div class="bg-slide bg-slide--5"></div>
+      </div>
+      <div class="content">
+        <header>
+          <div class="brand">
+            <img
+              src="assets/logo.png"
+              alt="Relevant Construction logo"
+              class="brand-logo"
+            />
+            <span class="brand-subtitle">CONSTRUCTION</span>
+          </div>
+        </header>
+
+        <main class="main-row">
+          <section class="login-card" aria-label="Login to automation portal">
+            <h1 class="login-title">Automation Portal Login</h1>
+
+            <form class="auth-form">
+              <div class="field-group">
+                <label for="email">Email</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  placeholder="name@example.com"
+                  required
+                />
+              </div>
+
+              <div class="field-group" style="margin-top: 4px;">
+                <label for="password">Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Your password"
+                  required
+                />
+              </div>
+
+              <div class="actions">
+                <p class="signup-text" id="mode-toggle-text">
+                  <span class="signup-text-label">Don’t have an account?</span>
+                  <a href="#" id="mode-toggle-link" aria-label="Sign up for an account">Sign up</a>
+                </p>
+                <button type="submit" class="btn-primary" id="primary-action">Login</button>
+              </div>
+              <p class="auth-error" id="auth-error"></p>
+            </form>
+          </section>
+        </main>
+
+        <footer class="footer">
+          <span>&copy; 2025 Relevant Construction. All Rights Reserved.</span>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const form = document.querySelector('.auth-form');
+        const titleEl = document.querySelector('.login-title');
+        const primaryButton = document.getElementById('primary-action');
+        const toggleText = document.getElementById('mode-toggle-text');
+        const toggleLabel = toggleText.querySelector('.signup-text-label');
+        const toggleLink = document.getElementById('mode-toggle-link');
+        const errorEl = document.getElementById('auth-error');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        let mode = 'login'; // 'login' or 'signup'
+
+        function clearError() {
+          errorEl.textContent = '';
+        }
+
+        function setError(message) {
+          errorEl.textContent = message || '';
+        }
+
+        function renderMode() {
+          clearError();
+          if (mode === 'login') {
+            titleEl.textContent = 'Automation Portal Login';
+            primaryButton.textContent = 'Login';
+            toggleLabel.textContent = "Don't have an account?";
+            toggleLink.textContent = 'Sign up';
+            toggleLink.setAttribute('aria-label', 'Sign up for an account');
+          } else {
+            titleEl.textContent = 'Automation Portal Sign Up';
+            primaryButton.textContent = 'Sign Up';
+            toggleLabel.textContent = 'Already have an account?';
+            toggleLink.textContent = 'Log in';
+            toggleLink.setAttribute('aria-label', 'Log in to your account');
+          }
+        }
+
+        toggleLink.addEventListener('click', function (event) {
+          event.preventDefault();
+          mode = mode === 'login' ? 'signup' : 'login';
+          renderMode();
+        });
+
+        form.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          clearError();
+
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+
+          if (!email || !password) {
+            setError('Email and password are required.');
+            return;
+          }
+
+          const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+
+          try {
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+              setError(data.error || 'Request failed. Please try again.');
+              return;
+            }
+
+            if (mode === 'signup') {
+              // Show simple confirmation and switch back to login
+              setError('Account requested. An admin will approve your access.');
+              mode = 'login';
+              renderMode();
+              return;
+            }
+
+            // Login success: persist token and go to dashboard placeholder
+            if (data && data.token) {
+              try {
+                window.localStorage.setItem('authToken', data.token);
+              } catch (e) {
+                // ignore storage errors
+              }
+            }
+            window.location.href = '/dashboard';
+          } catch (err) {
+            setError('Network error. Please try again.');
+          }
+        });
+
+        renderMode();
+      })();
+    </script>
+  </body>
+</html>

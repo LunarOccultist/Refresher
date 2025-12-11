@@ -1,21 +1,23 @@
 {
   "name": "refresher",
   "version": "0.0.2",
-  "description": "Automated Buildertrend scraper for project data collection and local storage.",
-  "main": "main.js",
+  "description": "Buildertrend scraper and SQlite DB storage and Push to Monday via API",
+  "main": "log.js",
   "scripts": {
-    "start": "node main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "Dakota Wilson",
-  "license": "MIT",
+  "license": "GNUPL 3.0",
   "type": "commonjs",
   "dependencies": {
-    "@supabase/supabase-js": "^2.87.1",
     "axios": "^1.13.2",
+    "bcryptjs": "^2.4.3",
+    "express": "^5.2.1",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2",
     "playwright": "^1.57.0",
-    "postgres": "^3.4.7",
     "sqlite3": "^5.1.7"
   }
 }
