@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Relevant Construction – Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: #edf2f7;
+        color: #0c394d;
+      }
+
+      .app-shell {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 20px;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+        z-index: 20;
+      }
+
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .topbar-logo {
+        height: 28px;
+        width: auto;
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .topbar-greeting {
+        font-size: 0.8rem;
+        color: #6b7280;
+      }
+
+      .topbar-greeting span {
+        font-weight: 600;
+        color: #0c394d;
+      }
+
+      .topbar-avatar-button {
+        border: none;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+        border-radius: 999px;
+      }
+
+      .topbar-avatar {
+        height: 40px;
+        width: 40px;
+        border-radius: 999px;
+        object-fit: cover;
+        border: 2px solid #de5419;
+      }
+
+      .topbar-logout-button {
+        border: none;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+        border-radius: 999px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+      }
+
+      .topbar-logout-button:hover {
+        color: #dc2626;
+      }
+
+      .topbar-logout-icon {
+        width: 16px;
+        height: 16px;
+      }
+
+.main-row {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+        padding-top: 60px; /* make room for fixed topbar */
+      }
+
+      .sidebar {
+        width: 200px;
+        background: #0c394d;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+
+      .sidebar-nav {
+        padding-top: 40px;
+      }
+
+      .nav-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .nav-item {
+        position: relative;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+
+      .nav-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: transparent;
+        border-radius: 0 2px 2px 0;
+        transition: background 0.15s ease;
+      }
+
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .nav-item.nav-item--active:hover {
+        background: #ffffff;
+      }
+
+      .nav-item--active {
+        background: #ffffff;
+        color: #0c394d;
+        font-weight: 600;
+      }
+
+      .nav-item--active::before {
+        background: #de5419;
+      }
+
+      .sidebar-footer {
+        padding: 12px 10px 16px;
+        font-size: 0.7rem;
+      }
+
+      .sidebar-footer-title {
+        margin-bottom: 4px;
+      }
+
+      .status-list {
+        list-style: none;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 2px;
+      }
+
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #16a34a;
+      }
+
+      .content {
+        flex: 1;
+        padding: 16px 20px;
+        min-height: 0;
+        margin-left: 200px; /* account for fixed sidebar */
+      }
+
+      .content-panel {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+        border: 1px solid #e5e7eb;
+        width: 100%;
+        height: calc(100vh - 72px);
+        overflow: auto;
+      }
+
+      /* User settings panel */
+      .settings-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 40;
+      }
+
+      .settings-overlay--visible {
+        display: flex;
+      }
+
+      .settings-panel {
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.35);
+        width: 440px;
+        max-width: calc(100% - 32px);
+        padding: 20px 22px 18px;
+      }
+
+      .settings-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .settings-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0c394d;
+      }
+
+      .settings-close {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 1rem;
+        color: #6b7280;
+      }
+
+      .settings-row {
+        margin-top: 10px;
+      }
+
+      .settings-row label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #6b7280;
+        margin-bottom: 4px;
+      }
+
+      .settings-row input {
+        width: 100%;
+        padding: 8px 9px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 0.85rem;
+      }
+
+      .settings-row input:focus {
+        outline: none;
+        border-color: #0c394d;
+        box-shadow: 0 0 0 1px #0c394d33;
+      }
+
+      .settings-avatar-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+      }
+
+      .settings-avatar-preview {
+        height: 40px;
+        width: 40px;
+        border-radius: 999px;
+        object-fit: cover;
+        border: 2px solid #de5419;
+      }
+
+      .settings-avatar-input {
+        flex: 1;
+      }
+
+      .settings-section-title {
+        margin-top: 18px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #0c394d;
+      }
+
+      .settings-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .btn {
+        border-radius: 999px;
+        padding: 7px 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid transparent;
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      .btn-primary {
+        background: #0c394d;
+        color: #ffffff;
+        border-color: #0c394d;
+      }
+
+      .btn-primary:hover {
+        background: #082634;
+      }
+
+      .settings-error {
+        margin-top: 6px;
+        font-size: 0.8rem;
+        color: #dc2626;
+        min-height: 1em;
+      }
+
+      .settings-success {
+        margin-top: 4px;
+        font-size: 0.8rem;
+        color: #16a34a;
+        min-height: 1em;
+      }
+
+      .divider {
+        margin: 10px 0;
+        border: none;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          display: none;
+        }
+
+        .content {
+          margin-left: 0;
+        }
+
+        .content-panel {
+          height: auto;
+          min-height: calc(100vh - 72px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <img src="assets/logo.png" alt="Relevant Construction" class="topbar-logo" />
+        </div>
+
+        <div class="topbar-right">
+        <div class="topbar-right">
+          <div class="topbar-greeting" id="topbar-greeting">Hello, <span>User</span></div>
+          <button
+            type="button"
+            class="topbar-avatar-button"
+            id="open-settings-button"
+            aria-label="Open user settings"
+          >
+            <img
+              src="assets/users/default-avatar.svg"
+              alt="User avatar"
+              class="topbar-avatar"
+              id="topbar-avatar"
+            />
+          </button>
+          <button
+            type="button"
+            class="topbar-logout-button"
+            id="topbar-logout-button"
+            aria-label="Log out"
+            title="Log out"
+          >
+            <svg
+              class="topbar-logout-icon"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <rect
+                x="3"
+                y="4"
+                width="10"
+                height="16"
+                rx="1.5"
+                ry="1.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+              />
+              <path
+                d="M14 12h7m0 0-3-3m3 3-3 3"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="main-row">
+        <aside class="sidebar">
+          <div class="sidebar-nav">
+            <div class="nav-section">
+              <div class="nav-item nav-item--active" data-view="overview">Overview</div>
+              <div class="nav-item" data-view="jobs">Jobs</div>
+              <div class="nav-item nav-item--admin" data-view="admin">Admin</div>
+              <div class="nav-item" data-view="accounting">Accounting</div>
+            </div>
+          </div>
+
+          <div class="sidebar-footer">
+            <div class="sidebar-footer-title">Refresher v1.0.0</div>
+            <ul class="status-list">
+              <li class="status-item">
+                <span class="status-dot"></span>
+                <span>Database</span>
+              </li>
+              <li class="status-item">
+                <span class="status-dot"></span>
+                <span>Egress API</span>
+              </li>
+              <li class="status-item">
+                <span class="status-dot"></span>
+                <span>Status</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <main class="content">
+          <div class="content-panel" id="content-panel"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- User settings -->
+    <div class="settings-overlay" id="settings-overlay" aria-hidden="true">
+      <section class="settings-panel" role="dialog" aria-modal="true" aria-label="User settings">
+        <div class="settings-header">
+          <h2 class="settings-title">User Settings</h2>
+          <button type="button" class="settings-close" id="settings-close-button">×</button>
+        </div>
+
+        <form id="profile-form">
+          <div class="settings-row">
+            <label for="display-name">Name</label>
+            <input id="display-name" name="displayName" type="text" />
+          </div>
+
+          <div class="settings-row">
+            <label for="profile-email">Email</label>
+            <input id="profile-email" name="email" type="email" />
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-section-title">Profile Icon</span>
+            <div class="settings-avatar-row">
+              <img
+                src="assets/users/default-avatar.svg"
+                alt="Avatar preview"
+                class="settings-avatar-preview"
+                id="settings-avatar-preview"
+              />
+              <div class="settings-avatar-input">
+                <label for="avatar-file">Upload icon</label>
+                <input
+                  id="avatar-file"
+                  name="avatar"
+                  type="file"
+                  accept="image/*"
+                />
+                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
+                  PNG/JPEG, up to 2&nbsp;MB.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button type="button" class="btn" id="profile-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+          <p class="settings-error" id="profile-error"></p>
+          <p class="settings-success" id="profile-success"></p>
+        </form>
+
+        <hr class="divider" />
+
+        <h3 class="settings-section-title">Change Password</h3>
+        <form id="password-form">
+          <div class="settings-row">
+            <label for="current-password">Current password</label>
+            <input
+              id="current-password"
+              name="currentPassword"
+              type="password"
+              autocomplete="current-password"
+            />
+          </div>
+          <div class="settings-row">
+            <label for="new-password">New password</label>
+            <input
+              id="new-password"
+              name="newPassword"
+              type="password"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="settings-actions">
+            <button type="submit" class="btn btn-primary">Update Password</button>
+          </div>
+          <p class="settings-error" id="password-error"></p>
+          <p class="settings-success" id="password-success"></p>
+        </form>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        const overlay = document.getElementById('settings-overlay');
+        const openBtn = document.getElementById('open-settings-button');
+        const closeBtn = document.getElementById('settings-close-button');
+        const topbarGreeting = document.getElementById('topbar-greeting');
+        const topbarAvatar = document.getElementById('topbar-avatar');
+        const topbarLogoutButton = document.getElementById('topbar-logout-button');
+        const adminNavItem = document.querySelector('.nav-item.nav-item--admin');
+        const contentPanel = document.getElementById('content-panel');
+        const navItems = document.querySelectorAll('.nav-item[data-view]');
+        const avatarPreview = document.getElementById('settings-avatar-preview');
+        const avatarFileInput = document.getElementById('avatar-file');
+        const displayNameInput = document.getElementById('display-name');
+        const emailInput = document.getElementById('profile-email');
+
+        const profileForm = document.getElementById('profile-form');
+        const profileError = document.getElementById('profile-error');
+        const profileSuccess = document.getElementById('profile-success');
+        const profileCancel = document.getElementById('profile-cancel');
+
+        const passwordForm = document.getElementById('password-form');
+        const passwordError = document.getElementById('password-error');
+        const passwordSuccess = document.getElementById('password-success');
+
+        let currentView = 'overview';
+
+        function renderView(view) {
+          if (!contentPanel) return;
+          currentView = view;
+
+          navItems.forEach((item) => {
+            if (item.dataset.view === view) {
+              item.classList.add('nav-item--active');
+            } else {
+              item.classList.remove('nav-item--active');
+            }
+          });
+
+          if (view === 'overview') {
+            contentPanel.innerHTML = `
+              <div style="padding: 16px;">
+                <h2 style="font-size: 1rem; margin-bottom: 8px;">Overview</h2>
+                <p style="font-size: 0.85rem; color: #6b7280;">
+                  High-level metrics and trends will appear here.
+                </p>
+              </div>
+            `;
+          } else if (view === 'jobs') {
+            contentPanel.innerHTML = `
+              <div style="padding: 16px;">
+                <h2 style="font-size: 1rem; margin-bottom: 8px;">Jobs</h2>
+                <p style="font-size: 0.85rem; color: #6b7280;">
+                  Job list and job details will appear here.
+                </p>
+              </div>
+            `;
+          } else if (view === 'admin') {
+            contentPanel.innerHTML = `
+              <div style="padding: 16px;">
+                <h2 style="font-size: 1rem; margin-bottom: 8px;">Admin</h2>
+                <p style="font-size: 0.85rem; color: #6b7280;">
+                  User management tools will appear here.
+                </p>
+              </div>
+            `;
+          } else if (view === 'accounting') {
+            contentPanel.innerHTML = `
+              <div style="padding: 16px;">
+                <h2 style="font-size: 1rem; margin-bottom: 8px;">Accounting</h2>
+                <p style="font-size: 0.85rem; color: #6b7280;">
+                  Future financial and QuickBooks integration views will appear here.
+                </p>
+              </div>
+            `;
+          }
+        }
+
+        function handleNavClick(event) {
+          const target = event.currentTarget;
+          const view = target && target.dataset.view;
+          if (!view) return;
+          if (view === 'admin' && adminNavItem && adminNavItem.style.display === 'none') {
+            // Non-admin users shouldn't be able to activate Admin even via keyboard
+            return;
+          }
+          renderView(view);
+        }
+
+        navItems.forEach((item) => {
+          item.addEventListener('click', handleNavClick);
+        });
+
+        function openSettings() {
+          overlay.classList.add('settings-overlay--visible');
+          overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeSettings() {
+          overlay.classList.remove('settings-overlay--visible');
+          overlay.setAttribute('aria-hidden', 'true');
+          profileError.textContent = '';
+          profileSuccess.textContent = '';
+          passwordError.textContent = '';
+          passwordSuccess.textContent = '';
+        }
+
+        openBtn.addEventListener('click', openSettings);
+        closeBtn.addEventListener('click', closeSettings);
+        overlay.addEventListener('click', function (event) {
+          if (event.target === overlay) {
+            closeSettings();
+          }
+        });
+
+        function applyProfileToUI(profile) {
+          if (!profile) return;
+
+          const nameForGreeting = profile.displayName || profile.email || 'User';
+          if (topbarGreeting) {
+            topbarGreeting.innerHTML = `Hello, <span>${nameForGreeting}</span>`;
+          }
+
+          if (adminNavItem) {
+            if (profile.role === 'admin') {
+              adminNavItem.style.display = '';
+            } else {
+              adminNavItem.style.display = 'none';
+            }
+          }
+
+          if (profile.displayName) {
+            displayNameInput.value = profile.displayName;
+          }
+          if (profile.email) {
+            emailInput.value = profile.email;
+          }
+          if (profile.avatar) {
+            topbarAvatar.src = profile.avatar;
+            avatarPreview.src = profile.avatar;
+          } else {
+            topbarAvatar.src = 'assets/users/default-avatar.svg';
+            avatarPreview.src = 'assets/users/default-avatar.svg';
+          }
+        }
+
+        renderView(currentView);
+
+        async function loadProfile() {
+          try {
+            const res = await fetch('/api/me');
+            if (!res.ok) return;
+            const data = await res.json();
+            applyProfileToUI(data);
+          } catch (err) {
+            // ignore for now
+          }
+        }
+
+        profileCancel.addEventListener('click', function () {
+          closeSettings();
+          loadProfile();
+        });
+
+        if (avatarFileInput) {
+          avatarFileInput.addEventListener('change', async function () {
+            profileError.textContent = '';
+            profileSuccess.textContent = '';
+
+            const file = avatarFileInput.files && avatarFileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            try {
+              const res = await fetch('/api/me/avatar', {
+                method: 'POST',
+                body: formData,
+              });
+
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                profileError.textContent = data.error || 'Failed to upload icon';
+                return;
+              }
+
+              profileSuccess.textContent = 'Profile updated.';
+              applyProfileToUI(data);
+            } catch (err) {
+              profileError.textContent = 'Network error. Please try again.';
+            }
+          });
+        }
+
+        profileForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          profileError.textContent = '';
+          profileSuccess.textContent = '';
+
+          const payload = {
+            displayName: displayNameInput.value.trim(),
+            email: emailInput.value.trim(),
+          };
+
+          try {
+            const res = await fetch('/api/me/profile', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              profileError.textContent = data.error || 'Failed to update profile';
+              return;
+            }
+
+            profileSuccess.textContent = 'Profile updated.';
+            applyProfileToUI(data);
+          } catch (err) {
+            profileError.textContent = 'Network error. Please try again.';
+          }
+        });
+
+        passwordForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          passwordError.textContent = '';
+          passwordSuccess.textContent = '';
+
+          const currentPassword = document.getElementById('current-password').value;
+          const newPassword = document.getElementById('new-password').value;
+
+          if (!currentPassword || !newPassword) {
+            passwordError.textContent = 'Current and new password are required.';
+            return;
+          }
+
+          try {
+            const res = await fetch('/api/me/password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ currentPassword, newPassword }),
+            });
+
+            if (res.status === 204) {
+              passwordSuccess.textContent = 'Password updated.';
+              document.getElementById('current-password').value = '';
+              document.getElementById('new-password').value = '';
+              return;
+            }
+
+            const data = await res.json().catch(() => ({}));
+            passwordError.textContent = data.error || 'Failed to update password';
+          } catch (err) {
+            passwordError.textContent = 'Network error. Please try again.';
+          }
+        });
+
+        loadProfile();
+
+        async function performLogout() {
+          try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+          } catch (err) {
+            // ignore; we'll still clear client state
+          }
+
+          try {
+            window.localStorage.removeItem('authToken');
+          } catch (e) {
+            // ignore
+          }
+
+          window.location.href = '/login';
+        }
+
+        if (topbarLogoutButton) {
+          topbarLogoutButton.addEventListener('click', performLogout);
+        }
+      })();
+    </script>
+
+  </body>
+</html>

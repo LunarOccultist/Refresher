@@ -1,8 +1,9 @@
 node_modules/
-config.json
-package-lock.json
+src/config.json
+src/package-lock.json
 WARP.md
 .DS_Store
-database.db
+src/db/database.db
+src/web/assets
 ignore.js
 0.OLD - DO NOT USE/

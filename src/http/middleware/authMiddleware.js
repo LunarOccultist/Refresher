@@ -1,0 +1,88 @@
+const { getUserByToken } = require('../../db/users');
+const { ROLE } = require('../../services/authService');
+
+function parseCookies(header) {
+  const cookies = {};
+  if (!header) return cookies;
+
+  const parts = header.split(';');
+  for (const part of parts) {
+    const [rawName, ...rest] = part.split('=');
+    if (!rawName) continue;
+    const name = rawName.trim();
+    if (!name) continue;
+    const value = rest.join('=').trim();
+    cookies[name] = decodeURIComponent(value || '');
+  }
+
+  return cookies;
+}
+
+async function getUserFromRequest(req) {
+  const cookies = parseCookies(req.headers.cookie || '');
+  const token = cookies.authToken;
+
+  if (!token) return null;
+
+  const user = await getUserByToken(token);
+  return user || null;
+}
+
+async function requireDashboardAuth(req, res, next) {
+  try {
+    const user = await getUserFromRequest(req);
+
+    if (!user || !user.role || user.role === ROLE.ONBOARD || user.role === ROLE.INACTIVE) {
+      return res.redirect('/');
+    }
+
+    // Attach user to request for future use if needed
+    req.user = user;
+    return next();
+  } catch (err) {
+    return res.redirect('/');
+  }
+}
+
+async function requireAdminAuth(req, res, next) {
+  try {
+    const user = await getUserFromRequest(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    if (!user.role || user.role !== ROLE.ADMIN) {
+      return res.status(403).json({ error: 'Admin role required' });
+    }
+
+    req.user = user;
+    return next();
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to authorize request' });
+  }
+}
+
+async function requireAuthJson(req, res, next) {
+  try {
+    const user = await getUserFromRequest(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    if (!user.role || user.role === ROLE.ONBOARD || user.role === ROLE.INACTIVE) {
+      return res.status(403).json({ error: 'Account is not active' });
+    }
+
+    req.user = user;
+    return next();
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to authorize request' });
+  }
+}
+
+module.exports = {
+  getUserFromRequest,
+  requireDashboardAuth,
+  requireAdminAuth,
+  requireAuthJson,
+};

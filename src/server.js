@@ -1,6 +1,10 @@
 const app = require('./http');
 const log = require('./log');
 const { verifyLogin } = require('./buildertrend');
+const { getDb } = require('./db');
+
+// Ensure SQLite database exists and schema is initialized on startup
+getDb();
 
 const PORT = process.env.PORT || 3000;
 

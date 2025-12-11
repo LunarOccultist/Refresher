@@ -57,6 +57,55 @@ function initializeSchema(db) {
       }
     },
   );
+
+  db.run(
+    `CREATE TABLE IF NOT EXISTS user (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      token TEXT,
+      role TEXT NOT NULL DEFAULT 'user',
+      display_name TEXT,
+      avatar TEXT
+    )`,
+    (err) => {
+      if (err) {
+        log.error(`Failed to ensure user table: ${err.message}`);
+      } else {
+        log.debug('Ensured user table exists');
+
+        // Best-effort migration for existing databases: add missing columns
+        db.all("PRAGMA table_info(user)", [], (pragmaErr, rows) => {
+          if (pragmaErr) {
+            log.error(`Failed to inspect user table schema: ${pragmaErr.message}`);
+            return;
+          }
+
+          const existingCols = new Set(rows.map((r) => r.name));
+
+          if (!existingCols.has('display_name')) {
+            db.run('ALTER TABLE user ADD COLUMN display_name TEXT', (alterErr) => {
+              if (alterErr) {
+                log.error(`Failed to add display_name column: ${alterErr.message}`);
+              } else {
+                log.debug('Added display_name column to user table');
+              }
+            });
+          }
+
+          if (!existingCols.has('avatar')) {
+            db.run('ALTER TABLE user ADD COLUMN avatar TEXT', (alterErr) => {
+              if (alterErr) {
+                log.error(`Failed to add avatar column: ${alterErr.message}`);
+              } else {
+                log.debug('Added avatar column to user table');
+              }
+            });
+          }
+        });
+      }
+    },
+  );
 }
 
 function closeDb() {
