@@ -95,10 +95,89 @@ async function setJobActiveFlag(req, res) {
   }
 }
 
+async function listJobsOverview(req, res) {
+  const { activeOnly } = req.query;
+
+  try {
+    const rows = await jobService.listJobsWithLatestSnapshot({ activeOnly: activeOnly === 'true' });
+    const result = rows.map(({ job, snapshot }) => ({
+      id: job.id,
+      address: job.address,
+      active: !!job.active,
+      mondayId: job.monday_id || null,
+      latestCapturedAt: snapshot ? snapshot.captured_at : null,
+      latestMetrics: snapshot
+        ? {
+            est_bc: snapshot.est_bc,
+            est_cp: snapshot.est_cp,
+            job_cost: snapshot.job_cost,
+            inv_t: snapshot.inv_t,
+            inv_p: snapshot.inv_p,
+          }
+        : null,
+    }));
+    return res.json(result);
+  } catch (err) {
+    log.error(`listJobsOverview failed: ${err.stack || err.message}`);
+    return res.status(500).json({ error: 'Failed to load jobs overview' });
+  }
+}
+
+async function getJobSnapshots(req, res) {
+  const { address } = req.params;
+
+  try {
+    const data = await jobService.getJobSnapshotsByAddress(address);
+    if (!data) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+    return res.json(data);
+  } catch (err) {
+    log.error(`getJobSnapshots failed for \"${address}\": ${err.stack || err.message}`);
+    return res.status(500).json({ error: 'Failed to load job snapshots' });
+  }
+}
+
+async function createJob(req, res) {
+  const { address, mondayId, monday_id } = req.body || {};
+  const rawAddress = typeof address === 'string' ? address.trim() : '';
+
+  if (!rawAddress) {
+    return res
+      .status(400)
+      .json({ error: 'address is required and must be a non-empty string' });
+  }
+
+  const effectiveMondayId = mondayId ?? monday_id ?? null;
+
+  try {
+    const job = await jobService.createJob({
+      address: rawAddress,
+      mondayId: effectiveMondayId,
+      active: true,
+    });
+
+    return res.status(201).json({
+      id: job.id,
+      address: job.address,
+      active: !!job.active,
+      mondayId: job.monday_id || null,
+    });
+  } catch (err) {
+    log.error(
+      `createJob failed for \"${rawAddress}\": ${err.stack || err.message}`,
+    );
+    return res.status(500).json({ error: 'Failed to create job' });
+  }
+}
+
 module.exports = {
   scrapeAndSnapshotJob,
   scrapeAndSnapshotJobsBatch,
   listJobs,
   getJobWithLatestSnapshot,
   setJobActiveFlag,
+  listJobsOverview,
+  getJobSnapshots,
+  createJob,
 };

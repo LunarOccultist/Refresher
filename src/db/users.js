@@ -150,7 +150,7 @@ function updateUserAvatarById(id, avatar) {
 
 function listUsers() {
   const db = getDb();
-  const sql = 'SELECT id, email, role, token FROM user ORDER BY id DESC';
+  const sql = 'SELECT id, email, role, token, display_name, avatar FROM user ORDER BY id DESC';
 
   return new Promise((resolve, reject) => {
     db.all(sql, [], (err, rows) => {

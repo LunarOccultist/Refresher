@@ -6,7 +6,7 @@ const statusController = require('./controllers/statusController');
 const authController = require('./controllers/authController');
 const adminController = require('./controllers/adminController');
 const meController = require('./controllers/meController');
-const { requireAdminAuth, requireAuthJson } = require('./middleware/authMiddleware');
+const { requireAdminAuth, requireAuthJson, requireUserOrAdminJson } = require('./middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -55,13 +55,21 @@ router.post('/me/avatar', requireAuthJson, uploadAvatar.single('avatar'), meCont
 
 // Admin
 router.get('/admin/users', requireAdminAuth, adminController.getUsers);
+router.post('/admin/users', requireAdminAuth, adminController.createUser);
+router.get('/admin/users/:id', requireAdminAuth, adminController.getUser);
+router.patch('/admin/users/:id', requireAdminAuth, adminController.updateUser);
+router.post('/admin/users/:id/password', requireAdminAuth, adminController.changeUserPassword);
+router.post('/admin/users/:id/avatar', requireAdminAuth, uploadAvatar.single('avatar'), adminController.uploadUserAvatar);
 router.post('/admin/users/:id/role', requireAdminAuth, adminController.updateUserRole);
 
 // Job-related endpoints
-router.get('/jobs', jobsController.listJobs);
-router.get('/jobs/:address/latest', jobsController.getJobWithLatestSnapshot);
-router.post('/jobs/:address/active', jobsController.setJobActiveFlag);
-router.post('/jobs/scrape', jobsController.scrapeAndSnapshotJob);
-router.post('/jobs/scrape-batch', jobsController.scrapeAndSnapshotJobsBatch);
+router.get('/jobs', requireAuthJson, jobsController.listJobs);
+router.get('/jobs/overview', requireAuthJson, jobsController.listJobsOverview);
+router.get('/jobs/:address/latest', requireAuthJson, jobsController.getJobWithLatestSnapshot);
+router.get('/jobs/:address/snapshots', requireAuthJson, jobsController.getJobSnapshots);
+router.post('/jobs', requireUserOrAdminJson, jobsController.createJob);
+router.post('/jobs/:address/active', requireUserOrAdminJson, jobsController.setJobActiveFlag);
+router.post('/jobs/scrape', requireUserOrAdminJson, jobsController.scrapeAndSnapshotJob);
+router.post('/jobs/scrape-batch', requireUserOrAdminJson, jobsController.scrapeAndSnapshotJobsBatch);
 
 module.exports = router;

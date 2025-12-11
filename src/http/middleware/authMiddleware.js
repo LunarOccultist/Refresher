@@ -1,5 +1,5 @@
 const { getUserByToken } = require('../../db/users');
-const { ROLE } = require('../../services/authService');
+const { ROLE, ROLE_RANK } = require('../../services/authService');
 
 function parseCookies(header) {
   const cookies = {};
@@ -80,9 +80,35 @@ async function requireAuthJson(req, res, next) {
   }
 }
 
+async function requireUserOrAdminJson(req, res, next) {
+  try {
+    const user = await getUserFromRequest(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    if (!user.role || user.role === ROLE.ONBOARD || user.role === ROLE.INACTIVE) {
+      return res.status(403).json({ error: 'Account is not active' });
+    }
+
+    const rank = ROLE_RANK[user.role];
+    const minRank = ROLE_RANK[ROLE.USER];
+
+    if (typeof rank !== 'number' || rank < minRank) {
+      return res.status(403).json({ error: 'User or admin role required' });
+    }
+
+    req.user = user;
+    return next();
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to authorize request' });
+  }
+}
+
 module.exports = {
   getUserFromRequest,
   requireDashboardAuth,
   requireAdminAuth,
   requireAuthJson,
+  requireUserOrAdminJson,
 };

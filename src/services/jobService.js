@@ -69,6 +69,33 @@ async function getJobWithLatestSnapshotByAddress(address) {
   return { job, snapshot };
 }
 
+async function listJobsWithLatestSnapshot({ activeOnly = false } = {}) {
+  const jobs = await listJobs({ activeOnly });
+  const results = await Promise.all(
+    jobs.map(async (job) => {
+      const snapshot = await getLatestSnapshotForJob(job.id);
+      return { job, snapshot };
+    }),
+  );
+  return results;
+}
+
+async function getJobSnapshotsByAddress(address) {
+  const job = await getJobByAddress(address);
+  if (!job) return null;
+  const snapshots = await listSnapshotsForJob(job.id);
+  return { job, snapshots };
+}
+
+async function createJob({ address, mondayId = null, active = true } = {}) {
+  if (!address || typeof address !== 'string' || !address.trim()) {
+    throw new Error('address is required and must be a non-empty string');
+  }
+
+  const job = await upsertJob({ address: address.trim(), active, mondayId });
+  return job;
+}
+
 async function scrapeAndSnapshotJobsBatch(addresses, { active = true } = {}) {
   if (!Array.isArray(addresses) || addresses.length === 0) {
     throw new Error('addresses must be a non-empty array of strings');
@@ -157,4 +184,7 @@ module.exports = {
   setJobActiveByAddress,
   getLatestSnapshotForJob,
   listSnapshotsForJob,
+  listJobsWithLatestSnapshot,
+  getJobSnapshotsByAddress,
+  createJob,
 };
