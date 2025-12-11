@@ -28,6 +28,12 @@ async function login(req, res) {
   try {
     const result = await authService.login({ email, password });
 
+    log.debug(
+      `User login success id=${result.user && result.user.id} email="${
+        result.user && result.user.email
+      }" role=${result.user && result.user.role}`,
+    );
+
     // Persist token as httpOnly cookie for server-side checks (e.g., dashboard access)
     const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
     res.cookie('authToken', result.token, {

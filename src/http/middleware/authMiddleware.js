@@ -1,5 +1,6 @@
 const { getUserByToken } = require('../../db/users');
 const { ROLE, ROLE_RANK } = require('../../services/authService');
+const log = require('../../log');
 
 function parseCookies(header) {
   const cookies = {};
@@ -38,6 +39,13 @@ async function requireDashboardAuth(req, res, next) {
 
     // Attach user to request for future use if needed
     req.user = user;
+
+    log.debug(
+      `[DASHBOARD] user id=${user.id} email="${user.email}" role=${user.role} -> ${
+        req.method
+      } ${req.originalUrl || req.url}`,
+    );
+
     return next();
   } catch (err) {
     return res.redirect('/');
@@ -56,6 +64,13 @@ async function requireAdminAuth(req, res, next) {
     }
 
     req.user = user;
+
+    log.debug(
+      `[ADMIN] user id=${user.id} email="${user.email}" role=${user.role} -> ${
+        req.method
+      } ${req.originalUrl || req.url}`,
+    );
+
     return next();
   } catch (err) {
     return res.status(500).json({ error: 'Failed to authorize request' });
@@ -74,6 +89,13 @@ async function requireAuthJson(req, res, next) {
     }
 
     req.user = user;
+
+    log.debug(
+      `[API] user id=${user.id} email="${user.email}" role=${user.role} -> ${
+        req.method
+      } ${req.originalUrl || req.url}`,
+    );
+
     return next();
   } catch (err) {
     return res.status(500).json({ error: 'Failed to authorize request' });
@@ -99,6 +121,13 @@ async function requireUserOrAdminJson(req, res, next) {
     }
 
     req.user = user;
+
+    log.debug(
+      `[API-UOrA] user id=${user.id} email="${user.email}" role=${user.role} -> ${
+        req.method
+      } ${req.originalUrl || req.url}`,
+    );
+
     return next();
   } catch (err) {
     return res.status(500).json({ error: 'Failed to authorize request' });
